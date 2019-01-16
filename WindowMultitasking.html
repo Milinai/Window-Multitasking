@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+*{
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	box-sizing: border-box;
+}
+body{
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+}
+.desktop{
+	background-image:
+		radial-gradient(circle at 10% 30%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 100% 10%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 12% 80%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 4% 56%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 20% 90%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 25% 40%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 30% 30%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 70% 60%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 51% 5%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 39% 72%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 89% 76%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 80% 16%, #FFF7 0, #FFF2 20px, #0000 22px)/*,
+		linear-gradient(50deg, #0000 30%, #00),
+		linear-gradient(160deg, #0000, var(--bgc2))*/;
+	background-color: var(--pref-desktop-bg, #0F0);
+	width: calc100vw;
+	height: calc(100vh - 31px);
+	overflow: hidden;
+}
+.taskbar{
+	background-color: var(--pref-theme-col, #0A0);
+	height: 31px;
+	box-shadow: 0 -1px 0 0 #000;
+	overflow: hidden;
+}
+.taskbar-inner{
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+		</style>
+		<script>
+class WinMulti{
+	constructor(){
+		this.desktop = new Desktop();
+		this.taskbar = new TaskBar();
+	}
+}
+class Desktop{
+	constructor(){
+		this.element = document.createElement("div");
+		this.element.setAttribute("class", "desktop");
+		this.windows = [];
+	}
+	newWindow(title, content){
+		this.windows[this.windows.length] = new Window(this, title, content);
+		this.element.appendChild(this.windows[this.windows.length-1]);
+	}
+}
+class Window{
+	constructor(desktop, title, content){
+		this.element = document.createElement("window");
+		this.taskbaritem = document.createElement("div");
+		this.taskbaritem.setAttribute("class", "taskbar-item");
+		this.desktop = desktop;
+		main.taskbar.task.appendChild(taskbaritem);
+
+		//this.element.
+	}
+}
+class TaskBar{
+	constructor(){
+		this.element = document.createElement("div");
+		this.element.setAttribute("class", "taskbar");
+		this.menubutton = document.createElement("div");
+		this.menubutton.setAttribute("class", "taskbar-menu-button");
+		this.task = document.createElement("div");
+		this.task.setAttribute("class", "taskbar-task");
+		this.inner = document.createElement("div");
+		this.inner.setAttribute("class", "taskbar-inner");
+		this.inner.appendChild(this.task)
+		this.element.appendChild(this.menubutton);
+		this.element.appendChild(this.inner);
+		this.items = [];
+	}
+}
+class TaskBarItem{
+	constructor(){
+		
+	}
+}
+class Popup{
+	constructor(){
+		
+	}
+}
+var main = new WinMulti();
+setTimeout(function(){
+	document.body.appendChild(main.desktop.element);
+	document.body.appendChild(main.taskbar.element);
+});
+		</script>
+	</head>
+	<body></body>
+</html>
