@@ -58,14 +58,16 @@ window{
 	width: 1em;
 	height: 1em;
 	display: inline-block;
+	text-align: center;
+	transition: background-color .1s linear;
 }
-.window-close{
+.window-close:hover{
 	background-color: #F00;
 }
-.window-maxim{
+.window-maxim:hover{
 	background-color: #0E0;
 }
-.window-minim{
+.window-minim:hover{
 	background-color: #FA0;
 }
 .window-inner{
@@ -207,18 +209,22 @@ class Desktop{
 		this.windows = [];
 	}
 	newWindow(title, content){
-		this.windows[this.windows.length] = new Window(this, title, content);
+		this.windows[this.windows.length] = new Window(this, title, content, this.windows.length);
 		this.element.appendChild(this.windows[this.windows.length-1].element);
 	}
 }
 class Window{
-	constructor(desktop, title, content){
+	constructor(desktop, title, content, id){
+		this.id = id;
 		this.element = document.createElement("window");
 		this.element.innerHTML = "<resizer class=\"resizer-tl\"></resizer><resizer class=\"resizer-t\"></resizer><resizer class=\"resizer-tr\">" +
 		"</resizer><resizer class=\"resizer-l\"></resizer><resizer class=\"resizer-r\"></resizer><resizer class=\"resizer-bl\"></resizer>" +
 		"<resizer class=\"resizer-b\"></resizer><resizer class=\"resizer-br\"></resizer>";
-		this.element.onmousedown = function(){
-			this.window.focus();
+		this.element.onmouseup = function(){
+			main.extra = this.window.id;
+			setTimeout(function(){
+				main.desktop.windows[main.extra].focus();
+			});
 		};
 		this.element.window = this;
 		this.barelement = document.createElement("div");
@@ -235,12 +241,18 @@ class Window{
 		this.element.appendChild(this.barelement);
 		this.minimbutton = document.createElement("div");
 		this.minimbutton.setAttribute("class", "window-button window-minim");
+		this.minimbutton.innerHTML = "-";
 		this.element.appendChild(this.minimbutton);
 		this.maximbutton = document.createElement("div");
 		this.maximbutton.setAttribute("class", "window-button window-maxim");
+		this.maximbutton.innerHTML = "&#9744;";
 		this.element.appendChild(this.maximbutton);
 		this.closebutton = document.createElement("div");
 		this.closebutton.setAttribute("class", "window-button window-close");
+		this.closebutton.innerHTML = "&times;";
+		this.closebutton.onclick = function(){
+			this.parentNode.window.close();
+		};
 		this.element.appendChild(this.closebutton);
 		this.inner = document.createElement("div");
 		this.inner.setAttribute("class", "window-inner");
@@ -258,11 +270,15 @@ class Window{
 		this.element.style.height = "300px";
 	}
 	setTitle(title){
-		this.element.children[8].innerHTML = title;
+		this.barelement.innerHTML = title;
 		this.taskbaritem.innerHTML = title;
 	}
 	focus(){
-		main.desktop.element.insertBefore(main.desktop.windows[main.desktop.windows.length].element, null);
+		main.desktop.element.insertBefore(this.element, null);
+	}
+	close(){
+		this.desktop.element.removeChild(this.element);
+		this.desktop.windows.splice(this.id, 1);
 	}
 }
 class TaskBar{
@@ -313,7 +329,7 @@ setTimeout(function(){
 	window.onmousedown = function(){
 		main.mouse.down = true;
 	}
-	window.onmouseup/* = window.onmouseout*/ = function(){
+	window.onmouseup = function(){
 		main.mouse.down = false;
 		for(i in main.desktop.windows){
 			main.desktop.windows[i].barelement.moving = false;
