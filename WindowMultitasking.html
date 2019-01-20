@@ -4,12 +4,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<style>
 *{
-	margin: 0;<!DOCTYPE html>
-<html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<style>
-*{
 	margin: 0;
 	padding: 0;
 	border: 0;
@@ -53,6 +47,7 @@ window{
 	background-color: var(--pref-theme-col, var(--pref-window-col, WindowFrame));
 	position: fixed;
 	padding: 2px;
+	box-shadow: 0 0 15px rgba(0, 0, 0, .5);
 }
 .window-title{
 	width: calc(100% - 3em);
@@ -161,6 +156,13 @@ resizer{
 	max-width: 150px;
 	transition: background-color .2s linear;
 	//border-radius: 5px;
+}
+.popup-menu{
+	position: fixed;
+	background-color: #FFF;
+	box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+	min-width: 100px;
+	min-height: 20px;
 }
 ::-webkit-scrollbar{
 	width: 11px;
@@ -227,10 +229,6 @@ class Window{
 		"</resizer><resizer class=\"resizer-l\"></resizer><resizer class=\"resizer-r\"></resizer><resizer class=\"resizer-bl\"></resizer>" +
 		"<resizer class=\"resizer-b\"></resizer><resizer class=\"resizer-br\"></resizer>";
 		this.element.onmousedown = function(){
-			/*main.extra = this.window.id;
-			setTimeout(function(){
-				main.desktop.windows[main.extra].focus();
-			});*/
 			this.window.focus();
 		};
 		this.element.window = this;
@@ -280,7 +278,6 @@ class Window{
 		this.taskbaritem.element.innerHTML = title;
 	}
 	focus(){
-		//this.desktop.element.insertBefore(this.element, null);
 		for(;;){
 			if(this.element.nextSibling === null){
 				break;
@@ -303,7 +300,9 @@ class TaskBar{
 		this.menubutton = document.createElement("div");
 		this.menubutton.setAttribute("class", "taskbar-menu-button");
 		this.menubutton.onclick = function(){
-			main.desktop.newWindow("Window", "A test.");
+			new Popup(false, true, 0, 31, [["New window", function(){
+				main.desktop.newWindow("Window", "A test.");
+			}]]);
 		};
 		this.task = document.createElement("div");
 		this.task.setAttribute("class", "taskbar-task");
@@ -323,346 +322,17 @@ class TaskBarItem{
 	}
 }
 class Popup{
-	constructor(items){
+	constructor(t, l, x, y, items){
 		this.element = document.createElement("div");
 		this.element.setAttribute("class", "popup-menu");
+		this.element.style[t ? "top" : "bottom"] = y + "px";
+		this.element.style[l ? "left" : "right"] = x + "px";
+		for(let i in items){
+			this.element.innerHTML += "<div class=\"popup-menu-item\">" + items[i][0] + "</div>";
+			this.element.lastChild.onclick = items[i][1];
+		}
 		document.body.appendChild(this.element);
-	}
-}
-var main = new WinMulti();
-setTimeout(function(){
-	document.body.appendChild(main.desktop.element);
-	document.body.appendChild(main.taskbar.element);
-	window.onmousemove = function(){
-		main.mouse.x = event.clientX;
-		main.mouse.y = event.clientY;
-		for(i in main.desktop.windows){
-			if(main.desktop.windows[i].barelement.moving){
-				let newx = main.desktop.windows[i].barelement.movestartx + main.mouse.x,
-					newy = main.desktop.windows[i].barelement.movestarty + main.mouse.y;
-				main.desktop.windows[i].element.style.top  = (newy > 0 ? newy : 0) + "px";
-				main.desktop.windows[i].element.style.left = (newx > 0 ? newx : 0) + "px";
-			}
-		}
-	}
-	window.onmousedown = function(){
-		main.mouse.down = true;
-	}
-	window.onmouseup = function(){
-		main.mouse.down = false;
-		for(i in main.desktop.windows){
-			main.desktop.windows[i].barelement.moving = false;
-		}
-	}
-});
-		</script>
-	</head>
-	<body></body>
-</html>
-
-	padding: 0;
-	border: 0;
-	outline: 0;
-	box-sizing: border-box;
-	user-select: none;
-}
-body{
-	width: 100vw;
-	height: 100vh;
-	overflow: hidden;
-	font-family: Arial;
-	font-size: 16px;
-	line-height: 1em;
-}
-.desktop{
-	background-image: var(--pref-background,
-		radial-gradient(circle at 10% 30%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 100% 10%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 12% 80%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 4% 56%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 20% 90%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 25% 40%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 30% 30%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 70% 60%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 51% 5%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 39% 72%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 89% 76%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 80% 16%, #FFF7 0, #FFF2 20px, #0000 22px)/*,
-		linear-gradient(50deg, #0000 30%, #00),
-		linear-gradient(160deg, #0000, var(--bgc2))*/);
-	background-color: var(--pref-desktop-bg, #0F0);
-	background-color: var(--pref-desktop-bg, Background);
-	width: 100vw;
-	height: calc(100vh - 31px);
-	overflow: hidden;
-}
-window{
-	display: block;
-	background-color: var(--pref-theme-col, var(--pref-window-col, #FD0));
-	background-color: var(--pref-theme-col, var(--pref-window-col, WindowFrame));
-	position: fixed;
-	padding: 2px;
-}
-.window-title{
-	width: calc(100% - 3em);
-	display: inline-block;
-	vertical-align: top;
-	padding: 1px;
-}
-.window-button{
-	width: 1em;
-	height: 1em;
-	display: inline-block;
-	text-align: center;
-	transition: background-color .1s linear;
-}
-.window-close:hover{
-	background-color: #F00;
-}
-.window-maxim:hover{
-	background-color: #0E0;
-}
-.window-minim:hover{
-	background-color: #FA0;
-}
-.window-inner{
-	background-color: #FFF;
-	height: calc(100% - 1em - 3px);
-	
-}
-resizer{
-	display: inline-block;
-	position: absolute;
-	width: 2px;
-	height: 2px;
-}
-.resizer-tl{
-	top: 0;
-	left: 0;
-	cursor: nw-resize;
-}
-.resizer-t{
-	top: 0;
-	left: 2px;
-	width: calc(100% - 4px);
-	cursor: n-resize;
-}
-.resizer-tr{
-	top: 0;
-	left: calc(100% - 2px);
-	cursor: ne-resize;
-}
-.resizer-l{
-	top: 2px;
-	left: 0;
-	height: calc(100% - 4px);
-	cursor: e-resize;
-}
-.resizer-r{
-	top: 2px;
-	left: calc(100% - 2px);
-	height: calc(100% - 4px);
-	cursor: w-resize;
-}
-.resizer-bl{
-	top: calc(100% - 2px);
-	left: 0;
-	cursor: sw-resize;
-}
-.resizer-b{
-	top: calc(100% - 2px);
-	left: 2px;
-	width: calc(100% - 4px);
-	cursor: s-resize;
-}
-.resizer-br{
-	top: calc(100% - 2px);
-	left: calc(100% - 2px);
-	cursor: se-resize;
-}
-.taskbar{
-	background-color: var(--pref-theme-col, #0A0);
-	height: 31px;
-	box-shadow: 0 1px 0 0 inset #000;
-	overflow: hidden;
-}
-.taskbar-menu-button{
-	width: 31px;
-	height: 31px;
-	display: inline-block;
-	box-shadow: 0 0 0 1px inset #000;
-}
-.taskbar-inner{
-	display: inline-block;
-	overflow-x: scroll;
-	overflow-y: hidden;
-	width: calc(100% - 31px);
-	height: 31px;
-}
-.taskbar-item{
-	display: inline-block;
-	background-color: #FFF2;
-	height: 20px;
-	padding: 4px;
-	//box-shadow: 0 0 0 1px inset #FFF7, inset 0 0 15px #FFF5;
-	margin-left: 3px;
-	font-size: 11px;
-	max-width: 150px;
-	transition: background-color .2s linear;
-	//border-radius: 5px;
-}
-::-webkit-scrollbar{
-	width: 11px;
-	height: 11px;
-	background-color: #0003;
-}
-::-webkit-scrollbar-track{
-	background-color: #0001;
-}
-::-webkit-scrollbar-thumb{
-	background-color: #0002;
-	border: 2px solid transparent;
-	background-clip: content-box;
-	border-radius: 5px;
-}
-::-webkit-scrollbar-button:decrement:start, ::-webkit-scrollbar-button:increment:end{
-	display: block;
-	width: 11px;
-	height: 11px;
-	background-repeat: no-repeat;
-	background-position: center;
-}
-::-webkit-scrollbar-button:increment{
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMjHxIGmVAAAAMklEQVQYV12KiQkAMAgD3X/pqw0oMUJ+C1j0tVg+IUcv0g+pdBVOMKj/lA/bjVGwAagHertslH6zFmQAAAAASUVORK5CYII=");
-}
-::-webkit-scrollbar-button:decrement{
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMjHxIGmVAAAAMUlEQVQYV1WJAQoAMAgC+/+nnbQUDSTPGwAOjy/YhVUpmUK5vcD/8oeU6ltyKC4oiXnFRmyUzEEbHgAAAABJRU5ErkJggg==");
-}
-::-webkit-scrollbar-button:increment:horizontal{
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMjHxIGmVAAAANUlEQVQYV3WLAQoAIAgD+/+nL7siNFKYuN0cgIpZK87tzYp5CgUapMI1X+Wv0xZ4d0DfAWBMT9hslJZs1TEAAAAASUVORK5CYII=");
-}
-::-webkit-scrollbar-button:decrement:horizontal{
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMjHxIGmVAAAAMklEQVQYV3VLCQoAMAjq/5+2ZiINKjA8A4BR915R6SugdwXyO1ihBsVc0TdZCiYUXwGR8ClslDpT8aUAAAAASUVORK5CYII=");
-}
-		</style>
-		<script>
-class WinMulti{
-	constructor(){
-		this.desktop = new Desktop();
-		this.taskbar = new TaskBar();
-		this.mouse = {
-			x: 0,
-			y: 0,
-			down: false
-		}
-	}
-}
-class Desktop{
-	constructor(){
-		this.element = document.createElement("div");
-		this.element.setAttribute("class", "desktop");
-		this.windows = [];
-	}
-	newWindow(title, content){
-		this.windows[this.windows.length] = new Window(this, title, content, this.windows.length);
-		this.element.appendChild(this.windows[this.windows.length-1].element);
-	}
-}
-class Window{
-	constructor(desktop, title, content, id){
-		this.id = id;
-		this.element = document.createElement("window");
-		this.element.innerHTML = "<resizer class=\"resizer-tl\"></resizer><resizer class=\"resizer-t\"></resizer><resizer class=\"resizer-tr\">" +
-		"</resizer><resizer class=\"resizer-l\"></resizer><resizer class=\"resizer-r\"></resizer><resizer class=\"resizer-bl\"></resizer>" +
-		"<resizer class=\"resizer-b\"></resizer><resizer class=\"resizer-br\"></resizer>";
-		this.element.onmouseup = function(){
-			main.extra = this.window.id;
-			setTimeout(function(){
-				main.desktop.windows[main.extra].focus();
-			});
-		};
-		this.element.window = this;
-		this.barelement = document.createElement("div");
-		this.barelement.setAttribute("class", "window-title");
-		this.barelement.onmousedown = function(){
-			//main.setCursor("move");
-			this.movestarty = parseInt(this.parentNode.style.top)  - main.mouse.y;
-			this.movestartx = parseInt(this.parentNode.style.left) - main.mouse.x;
-			this.moving = true;
-		};
-		this.barelement.onmouseup = function(){
-			this.moving = false;
-		}
-		this.element.appendChild(this.barelement);
-		this.minimbutton = document.createElement("div");
-		this.minimbutton.setAttribute("class", "window-button window-minim");
-		this.minimbutton.innerHTML = "-";
-		this.element.appendChild(this.minimbutton);
-		this.maximbutton = document.createElement("div");
-		this.maximbutton.setAttribute("class", "window-button window-maxim");
-		this.maximbutton.innerHTML = "&#9744;";
-		this.element.appendChild(this.maximbutton);
-		this.closebutton = document.createElement("div");
-		this.closebutton.setAttribute("class", "window-button window-close");
-		this.closebutton.innerHTML = "&times;";
-		this.closebutton.onclick = function(){
-			this.parentNode.window.close();
-		};
-		this.element.appendChild(this.closebutton);
-		this.inner = document.createElement("div");
-		this.inner.setAttribute("class", "window-inner");
-		this.element.appendChild(this.inner);
-
-		this.taskbaritem = document.createElement("div");
-		this.taskbaritem.setAttribute("class", "taskbar-item");
-		this.desktop = desktop;
-		main.taskbar.task.appendChild(this.taskbaritem);
-		this.setTitle(title);
-
-		this.element.style.top = "50px";
-		this.element.style.left = "100px";
-		this.element.style.width = "400px";
-		this.element.style.height = "300px";
-	}
-	setTitle(title){
-		this.barelement.innerHTML = title;
-		this.taskbaritem.innerHTML = title;
-	}
-	focus(){
-		main.desktop.element.insertBefore(this.element, null);
-	}
-	close(){
-		this.desktop.element.removeChild(this.element);
-		this.desktop.windows.splice(this.id, 1);
-	}
-}
-class TaskBar{
-	constructor(){
-		this.element = document.createElement("div");
-		this.element.setAttribute("class", "taskbar");
-		this.menubutton = document.createElement("div");
-		this.menubutton.setAttribute("class", "taskbar-menu-button");
-		this.menubutton.onclick = function(){
-			main.desktop.newWindow("Window", "A test.");
-		};
-		this.task = document.createElement("div");
-		this.task.setAttribute("class", "taskbar-task");
-		this.inner = document.createElement("div");
-		this.inner.setAttribute("class", "taskbar-inner");
-		this.inner.appendChild(this.task)
-		this.element.appendChild(this.menubutton);
-		this.element.appendChild(this.inner);
-		this.items = [];
-	}
-}
-class TaskBarItem{
-	constructor(){
-		
-	}
-}
-class Popup{
-	constructor(){
-		
+		this.element.popup = this;
 	}
 }
 var main = new WinMulti();
