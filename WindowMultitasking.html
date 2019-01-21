@@ -48,6 +48,13 @@ window{
 	position: fixed;
 	padding: 2px;
 	box-shadow: 0 0 15px rgba(0, 0, 0, .5);
+	transition: transform .15s linear, opacity .15s linear;
+}
+window.hidden{
+	opacity: 0;
+	pointer-events: none;
+	transform: perspective(10px) rotateX(1deg) translateY(-20px);
+	//transform: scale(.5, 0);
 }
 .window-title{
 	width: calc(100% - 3em);
@@ -163,6 +170,22 @@ resizer{
 	box-shadow: 0 0 5px rgba(0, 0, 0, .3);
 	min-width: 100px;
 	min-height: 20px;
+	padding: 5px 0;
+}
+.popup-menu-item{
+	margin: 5px;
+	padding: 5px 10px;
+	box-shadow: inset 0 0 0 1px #DDD;
+}
+.popup-menu-item:hover{
+	background-color: #DDD;
+}
+textarea{
+	resize: none;
+}
+.fill{
+	width: 100%;
+	height: 100%;
 }
 ::-webkit-scrollbar{
 	width: 11px;
@@ -201,6 +224,7 @@ resizer{
 		<script>
 class WinMulti{
 	constructor(){
+		document.body.innerHTML = "";
 		this.desktop = new Desktop();
 		this.taskbar = new TaskBar();
 		this.mouse = {
@@ -208,6 +232,8 @@ class WinMulti{
 			y: 0,
 			down: false
 		}
+		this.menus = document.createElement("div");
+		document.body.appendChild(this.menus);
 	}
 }
 class Desktop{
@@ -247,10 +273,16 @@ class Window{
 		this.minimbutton = document.createElement("div");
 		this.minimbutton.setAttribute("class", "window-button window-minim");
 		this.minimbutton.innerHTML = "-";
+		this.minimbutton.onclick = function(){
+			this.parentNode.window.hide();
+		};
 		this.element.appendChild(this.minimbutton);
 		this.maximbutton = document.createElement("div");
 		this.maximbutton.setAttribute("class", "window-button window-maxim");
 		this.maximbutton.innerHTML = "&#9744;";
+		this.maximbutton.onclick = function(){
+			this.parentNode.window.fill();
+		};
 		this.element.appendChild(this.maximbutton);
 		this.closebutton = document.createElement("div");
 		this.closebutton.setAttribute("class", "window-button window-close");
@@ -287,6 +319,15 @@ class Window{
 			}
 		}
 	}
+	hide(){
+		this.element.setAttribute("class", "hidden");
+	}
+	fill(){
+		this.element.style.top = "0";
+		this.element.style.left = "0";
+		this.element.style.width = main.desktop.element.offsetWidth + "px";
+		this.element.style.height = main.desktop.element.offsetHeight + "px";
+	}
 	close(){
 		this.desktop.element.removeChild(this.element);
 		this.desktop.windows.splice(this.id, 1);
@@ -300,8 +341,10 @@ class TaskBar{
 		this.menubutton = document.createElement("div");
 		this.menubutton.setAttribute("class", "taskbar-menu-button");
 		this.menubutton.onclick = function(){
-			new Popup(false, true, 0, 31, [["New window", function(){
-				main.desktop.newWindow("Window", "A test.");
+			new Popup(false, true, 0, 31, [["Text editor", function(){
+				main.desktop.newWindow("Text Editor", "<textarea class=\"fill\"></textarea>");
+			}], ["File manager", function(){
+				main.desktop.newWindow("File manager", "File explorer.<br /><i>Yeet</i>");
 			}]]);
 		};
 		this.task = document.createElement("div");
@@ -328,15 +371,19 @@ class Popup{
 		this.element.style[t ? "top" : "bottom"] = y + "px";
 		this.element.style[l ? "left" : "right"] = x + "px";
 		for(let i in items){
-			this.element.innerHTML += "<div class=\"popup-menu-item\">" + items[i][0] + "</div>";
-			this.element.lastChild.onclick = items[i][1];
+			let tmp = document.createElement("div");
+			tmp.innerHTML = items[i][0];
+			tmp.setAttribute("class", "popup-menu-item");
+			tmp.onclick = items[i][1];
+			this.element.appendChild(tmp);
 		}
-		document.body.appendChild(this.element);
+		main.menus.appendChild(this.element);
 		this.element.popup = this;
 	}
 }
-var main = new WinMulti();
+var main;
 setTimeout(function(){
+	main = new WinMulti();
 	document.body.appendChild(main.desktop.element);
 	document.body.appendChild(main.taskbar.element);
 	window.onmousemove = function(){
@@ -353,6 +400,13 @@ setTimeout(function(){
 	}
 	window.onmousedown = function(){
 		main.mouse.down = true;
+		let el = document.elementFromPoint(main.mouse.x, main.mouse.y)
+		if(el.parentNode === main.menus || el.parentNode.parentNode === main.menus){
+			
+		}
+		else{
+			main.menus.innerHTML = "";
+		}
 	}
 	window.onmouseup = function(){
 		main.mouse.down = false;
@@ -363,5 +417,5 @@ setTimeout(function(){
 });
 		</script>
 	</head>
-	<body></body>
+	<body><h1 style="margin: 50vh auto;">For this tool to work, you must enable JavaScript or use a browser that supports it.</h1></body>
 </html>
