@@ -329,10 +329,12 @@ class Window{
 		this.element.setAttribute("class", "hidden");
 	}
 	resize(dir){
-		this.movestarty = parseInt(this.element.style.top)  - main.mouse.y;
-		this.movestartx = parseInt(this.element.style.left) - main.mouse.x;
-		this.movestartw = parseInt(this.element.style.width)  - (main.mouse.x);
-		this.movestarth = parseInt(this.element.style.height) - (main.mouse.y);
+		this.movestarty = parseInt(this.element.style.top)    - main.mouse.y;
+		this.movestartx = parseInt(this.element.style.left)   - main.mouse.x;
+		this.movestartw = parseInt(this.element.style.width)  - main.mouse.x;
+		this.movestarth = parseInt(this.element.style.height) - main.mouse.y;
+		this.movestarttw = this.movestartx + this.movestartw + (main.mouse.x * 2);
+		this.movestartth = this.movestarty + this.movestarth + (main.mouse.y * 2);
 		this.resizing = dir;
 	}
 	fill(){
@@ -428,21 +430,43 @@ setTimeout(function(){
 				case "tl":
 					newx += main.mouse.x;
 					newy += main.mouse.y;
-					neww -= main.mouse.x;
-					newh -= main.mouse.y;
+					neww = main.desktop.windows[i].movestarttw - main.mouse.x;
+					newh = main.desktop.windows[i].movestartth - main.mouse.y;
 					main.desktop.windows[i].element.style.top    = (newy > 0 ? newy : 0) + "px";
 					main.desktop.windows[i].element.style.left   = (newx > 0 ? newx : 0) + "px";
 					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
 					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					break;
+				case "t":
+					newy += main.mouse.y;
+					newh = main.desktop.windows[i].movestartth - main.mouse.y;
+					main.desktop.windows[i].element.style.top    = (newy > 0 ? newy : 0) + "px";
+					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					break;
+				case "tr":
+					newy += main.mouse.y;
+					neww += main.mouse.x;
+					newh = main.desktop.windows[i].movestartth - main.mouse.y;
+					main.desktop.windows[i].element.style.top    = (newy > 0 ? newy : 0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
+					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					break;
+				case "l":
+					newx += main.mouse.x;
+					neww = main.desktop.windows[i].movestarttw - main.mouse.x;
+					main.desktop.windows[i].element.style.left   = (newx > 0 ? newx : 0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
 					break;
 				case "r":
 					neww += main.mouse.x;
 					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
 					break;
 				case "bl":
-					//neww += main.mouse.x;
+					newx += main.mouse.x;
+					neww = main.desktop.windows[i].movestarttw - main.mouse.x;
 					newh += main.mouse.y;
-					//main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
+					main.desktop.windows[i].element.style.left   = (newx > 0 ? newx : 0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
 					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
 					break;
 				case "b":
