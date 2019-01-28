@@ -21,18 +21,18 @@ body{
 }
 .desktop{
 	background-image: var(--pref-background,
-		radial-gradient(circle at 10% 30%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 10%  30%, #FFF7 0, #FFF2 20px, #0000 22px),
 		radial-gradient(circle at 100% 10%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 12% 80%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 4% 56%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 20% 90%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 25% 40%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 30% 30%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 70% 60%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 51% 5%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 39% 72%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 89% 76%, #FFF7 0, #FFF2 20px, #0000 22px),
-		radial-gradient(circle at 80% 16%, #FFF7 0, #FFF2 20px, #0000 22px)/*,
+		radial-gradient(circle at 12%  80%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 4%   56%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 20%  90%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 25%  40%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 30%  30%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 70%  60%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 51%   5%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 39%  72%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 89%  76%, #FFF7 0, #FFF2 20px, #0000 22px),
+		radial-gradient(circle at 80%  16%, #FFF7 0, #FFF2 20px, #0000 22px)/*,
 		linear-gradient(50deg, #0000 30%, #00),
 		linear-gradient(160deg, #0000, var(--bgc2))*/);
 	background-color: var(--pref-desktop-bg, #0F0);
@@ -53,7 +53,7 @@ window{
 window.hidden{
 	opacity: 0;
 	pointer-events: none;
-	transform: perspective(10px) rotateX(1deg) translateY(-20px);
+	transform: perspective(10px) rotateX(2deg) translateY(50px);
 	//transform: scale(.5, 0);
 }
 .window-title{
@@ -81,7 +81,7 @@ window.hidden{
 .window-inner{
 	background-color: #FFF;
 	height: calc(100% - 1em - 3px);
-	
+	//overflow: hidden;
 }
 resizer{
 	display: inline-block;
@@ -187,6 +187,14 @@ textarea{
 	width: 100%;
 	height: 100%;
 }
+button, input{
+	background-color: #FFF;
+	box-shadow: inset 0 0 0 1px #000;
+	padding: 2px;
+}
+input{
+	display: block;
+}
 ::-webkit-scrollbar{
 	width: 11px;
 	height: 11px;
@@ -234,6 +242,7 @@ class WinMulti{
 		}
 		this.menus = document.createElement("div");
 		document.body.appendChild(this.menus);
+		this.files = new Directory("~", null);
 	}
 }
 class Desktop{
@@ -242,14 +251,14 @@ class Desktop{
 		this.element.setAttribute("class", "desktop");
 		this.windows = [];
 	}
-	newWindow(title, content){
-		this.windows[this.windows.length] = new Window(this, title, content, this.windows.length);
+	newWindow(title, content, vars){
+		this.windows[this.windows.length] = new Window(this, title, content, this.windows.length, vars);
 		this.element.appendChild(this.windows[this.windows.length-1].element);
 	}
 }
 class Window{
-	constructor(desktop, title, content, id){
-		this.id = id;
+	constructor(desktop, title, content, id, vars){
+		//this.id = id;
 		this.element = document.createElement("window");
 		this.element.appendChild(new WindowResizer("tl"));
 		this.element.appendChild(new WindowResizer("t"));
@@ -268,8 +277,8 @@ class Window{
 		this.barelement.setAttribute("class", "window-title");
 		this.barelement.onmousedown = function(){
 			//main.setCursor("move");
-			this.movestarty = parseInt(this.parentNode.style.top)    - main.mouse.y;
-			this.movestartx = parseInt(this.parentNode.style.left)   - main.mouse.x;
+			this.movestarty = parseInt(this.parentNode.style.top)  - main.mouse.y;
+			this.movestartx = parseInt(this.parentNode.style.left) - main.mouse.x;
 			this.moving = true;
 		};
 		this.barelement.onmouseup = function(){
@@ -280,7 +289,7 @@ class Window{
 		this.minimbutton.setAttribute("class", "window-button window-minim");
 		this.minimbutton.innerHTML = "-";
 		this.minimbutton.onclick = function(){
-			this.parentNode.window.hide();
+			this.parentNode.window.toggle();
 		};
 		this.element.appendChild(this.minimbutton);
 		this.maximbutton = document.createElement("div");
@@ -301,15 +310,17 @@ class Window{
 		this.inner.setAttribute("class", "window-inner");
 		this.inner.innerHTML = content;
 		this.element.appendChild(this.inner);
-
-		this.taskbaritem = new TaskBarItem(title);
+		this.taskbaritem = new TaskBarItem(this);
 		this.desktop = desktop;
 		this.setTitle(title);
-
 		this.element.style.top = "50px";
 		this.element.style.left = "100px";
 		this.element.style.width = "400px";
 		this.element.style.height = "300px";
+		this.vars = vars;
+		if(this.vars.initial){
+			setTimeout(this.vars.initial, 0);
+		}
 	}
 	setTitle(title){
 		this.barelement.innerHTML = title;
@@ -325,8 +336,8 @@ class Window{
 			}
 		}
 	}
-	hide(){
-		this.element.setAttribute("class", "hidden");
+	toggle(){
+		this.element.setAttribute("class", this.element.getAttribute("class") === "hidden" ? "" : "hidden");
 	}
 	resize(dir){
 		this.movestarty = parseInt(this.element.style.top)    - main.mouse.y;
@@ -345,7 +356,7 @@ class Window{
 	}
 	close(){
 		this.desktop.element.removeChild(this.element);
-		this.desktop.windows.splice(this.id, 1);
+		this.desktop.windows.splice(this.desktop.windows.indexOf(this), 1);
 		main.taskbar.task.removeChild(this.taskbaritem.element);
 	}
 }
@@ -368,9 +379,31 @@ class TaskBar{
 		this.menubutton.setAttribute("class", "taskbar-menu-button");
 		this.menubutton.onclick = function(){
 			new Popup(false, true, 0, 31, [["Text editor", function(){
-				main.desktop.newWindow("Text Editor", "<textarea class=\"fill\"></textarea>");
+				main.desktop.newWindow("Text Editor", "<button class="/*wm-ui-button\*/+">Run</button><button>Save file</button><textarea class=\"fill\"></textarea>", {
+					initial: function(){
+						main.desktop.windows[main.desktop.windows.length - 1].inner.children[0].onclick = function(){
+							let tmep = window.open("", "");
+							tmep.document.write(this.nextSibling.value);
+						}
+						main.desktop.windows[main.desktop.windows.length - 1].inner.children[1].onclick = function(){
+							//main.files.savefile(this.nextSibling.value, "file.txt");
+							//main.fileprompt();
+							new FileSaveDialog();
+						}
+					}
+				});
 			}], ["File manager", function(){
-				main.desktop.newWindow("File manager", "File explorer.<br /><i>Yeet</i>");
+				main.desktop.newWindow("File manager", "", {
+					location: "~",
+					initial: function(){
+						
+					},
+					refresh(){
+						for(let i in main.files.content){
+							console.log(main.files.content[i]);
+						}
+					}
+				});
 			}]]);
 		};
 		this.task = document.createElement("div");
@@ -384,9 +417,18 @@ class TaskBar{
 	}
 }
 class TaskBarItem{
-	constructor(){
+	constructor(window){
 		this.element = document.createElement("div");
+		this.element.window = window;
 		this.element.setAttribute("class", "taskbar-item");
+		this.element.onclick = function(){
+			if(this.window.element.nextSibling){
+				this.window.focus();
+			}
+			else{
+				this.window.toggle();
+			}
+		}
 		main.taskbar.task.appendChild(this.element);
 	}
 }
@@ -405,6 +447,45 @@ class Popup{
 		}
 		main.menus.appendChild(this.element);
 		this.element.popup = this;
+	}
+}
+class Alert{
+	constructor(title, description, vars){
+		main.desktop.newWindow(title, description + "<button>OK</button>", vars);
+		main.desktop.windows[main.desktop.windows.length - 1].vars.promise = new Promise(function(resolve, reject){
+			main.desktop.windows[main.desktop.windows.length - 1].vars.resolve = resolve;
+			main.desktop.windows[main.desktop.windows.length - 1].vars.reject = reject;
+		});
+		main.desktop.windows[main.desktop.windows.length - 1].vars.initial = function(){
+			main.desktop.windows[main.desktop.windows.length - 1].inner.lastChild.onclick = function(){
+				this.parentNode.parentNode.window.vars.resolve();
+			}
+		}
+	}
+}
+class FileSaveDialog{
+	constructor(){
+		new Alert("Save file", "File name:<input />Directory:<input />", {});
+	}
+}
+class Directory{
+	constructor(dirname, parent){
+		this.dirname = dirname;
+		this.content = [];
+		this.parent = parent;
+	}
+}
+class File{
+	constructor(filename, content, type){
+		this.filename = filename;
+		this.data = content;
+		this.type = type;
+	}
+	edit(data){
+		this.data = data;
+	}
+	rename(filename){
+		this.filename = filename;
 	}
 }
 var main;
@@ -485,10 +566,7 @@ setTimeout(function(){
 	window.onmousedown = function(){
 		main.mouse.down = true;
 		let el = document.elementFromPoint(main.mouse.x, main.mouse.y)
-		if(el.parentNode === main.menus || el.parentNode.parentNode === main.menus){
-			
-		}
-		else{
+		if(!(el.parentNode === main.menus || el.parentNode.parentNode === main.menus)){
 			main.menus.innerHTML = "";
 		}
 	}
