@@ -253,7 +253,8 @@ class Desktop{
 	}
 	newWindow(title, content, vars){
 		this.windows[this.windows.length] = new Window(this, title, content, this.windows.length, vars);
-		this.element.appendChild(this.windows[this.windows.length-1].element);
+		this.element.appendChild(this.windows[this.windows.length - 1].element);
+		return this.windows[this.windows.length - 1];
 	}
 }
 class Window{
@@ -321,6 +322,7 @@ class Window{
 		if(this.vars.initial){
 			setTimeout(this.vars.initial, 0);
 		}
+		return this;
 	}
 	setTitle(title){
 		this.barelement.innerHTML = title;
@@ -383,21 +385,24 @@ class TaskBar{
 					initial: function(){
 						main.desktop.windows[main.desktop.windows.length - 1].inner.children[0].onclick = function(){
 							let tmep = window.open("", "");
-							tmep.document.write(this.nextSibling.value);
+							tmep.document.write(this.nextSibling.nextSibling.value);
 						}
 						main.desktop.windows[main.desktop.windows.length - 1].inner.children[1].onclick = function(){
 							//main.files.savefile(this.nextSibling.value, "file.txt");
 							//main.fileprompt();
-							new FileSaveDialog();
+							this.parentNode.parentNode.window.vars.saver = new FileSaveDialog(this.parentNode.parentNode.window);
+							this.parentNode.parentNode.window.vars.saver.vars.promise.then(function(str){
+								main.files.createFile(str, "File content", "text");
+							});
 						}
 					}
 				});
 			}], ["File manager", function(){
 				main.desktop.newWindow("File manager", "", {
 					location: "~",
-					initial: function(){
+					/*initial: function(){
 						
-					},
+					},*/
 					refresh(){
 						for(let i in main.files.content){
 							console.log(main.files.content[i]);
@@ -450,22 +455,26 @@ class Popup{
 	}
 }
 class Alert{
-	constructor(title, description, vars){
-		main.desktop.newWindow(title, description + "<button>OK</button>", vars);
-		main.desktop.windows[main.desktop.windows.length - 1].vars.promise = new Promise(function(resolve, reject){
-			main.desktop.windows[main.desktop.windows.length - 1].vars.resolve = resolve;
-			main.desktop.windows[main.desktop.windows.length - 1].vars.reject = reject;
-		});
-		main.desktop.windows[main.desktop.windows.length - 1].vars.initial = function(){
-			main.desktop.windows[main.desktop.windows.length - 1].inner.lastChild.onclick = function(){
-				this.parentNode.parentNode.window.vars.resolve();
+	constructor(caller, title, description){
+		let temp = {
+			caller: caller,
+			promise: new Promise(function(resolve, reject){
+				main.desktop.windows[main.desktop.windows.length - 1].vars.resolve = resolve;
+				main.desktop.windows[main.desktop.windows.length - 1].vars.reject = reject;
+			}),
+			initial: function(){
+				main.desktop.windows[main.desktop.windows.length - 1].inner.lastChild.onclick = function(){
+					this.parentNode.parentNode.window.vars.caller.vars.resolve("Text resolve");
+				}
 			}
 		}
+		this.window = main.desktop.newWindow(title, description + "<button>OK</button>", temp);
 	}
 }
 class FileSaveDialog{
-	constructor(){
-		new Alert("Save file", "File name:<input />Directory:<input />", {});
+	constructor(caller){
+		this.alert = new Alert(caller, "Save file", "File name:<input />Directory:<input />");
+		return this.alert.window;
 	}
 }
 class Directory{
@@ -473,6 +482,12 @@ class Directory{
 		this.dirname = dirname;
 		this.content = [];
 		this.parent = parent;
+	}
+	createDir(name){
+		this.content[this.content.length] = new Directory(name);
+	}
+	createFile(filename, content, type){
+		this.content[this.content.length] = new File(filename, content, type);
 	}
 }
 class File{
