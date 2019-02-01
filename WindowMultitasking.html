@@ -186,6 +186,8 @@ textarea{
 .fill{
 	width: 100%;
 	height: 100%;
+	display: flex;
+	flex: 1 1 auto;
 }
 button, input{
 	background-color: #FFF;
@@ -351,10 +353,10 @@ class Window{
 		this.resizing = dir;
 	}
 	fill(){
-		this.element.style.top = "0";
-		this.element.style.left = "0";
-		this.element.style.width = main.desktop.element.offsetWidth + "px";
-		this.element.style.height = main.desktop.element.offsetHeight + "px";
+		this.element.style.top =    "0";
+		this.element.style.left =   "0";
+		this.element.style.width =  (main.desktop.element.offsetWidth  > 150 ? main.desktop.element.offsetWidth  : 150) + "px";
+		this.element.style.height = (main.desktop.element.offsetHeight > 100 ? main.desktop.element.offsetHeight : 100) + "px";
 	}
 	close(){
 		this.desktop.element.removeChild(this.element);
@@ -388,11 +390,9 @@ class TaskBar{
 							tmep.document.write(this.nextSibling.nextSibling.value);
 						}
 						main.desktop.windows[main.desktop.windows.length - 1].inner.children[1].onclick = function(){
-							//main.files.savefile(this.nextSibling.value, "file.txt");
-							//main.fileprompt();
 							this.parentNode.parentNode.window.vars.saver = new FileSaveDialog(this.parentNode.parentNode.window);
-							this.parentNode.parentNode.window.vars.saver.vars.promise.then(function(str){
-								main.files.createFile(str, "File content", "text");
+							this.parentNode.parentNode.window.vars.saver.vars.promise.then(function(info){
+								main.files.createFile(info[0], info[1], "text");
 							});
 						}
 					}
@@ -464,7 +464,8 @@ class Alert{
 			}),
 			initial: function(){
 				main.desktop.windows[main.desktop.windows.length - 1].inner.lastChild.onclick = function(){
-					this.parentNode.parentNode.window.vars.caller.vars.resolve("Text resolve");
+					this.parentNode.parentNode.window.vars.caller.vars.resolve([this.previousSibling.previousSibling.previousSibling.value, this.parentNode.parentNode.window.vars.caller.inner.children[2].value]);
+					this.parentNode.parentNode.window.close();
 				}
 			}
 		}
@@ -528,52 +529,52 @@ setTimeout(function(){
 					newy += main.mouse.y;
 					neww = main.desktop.windows[i].movestarttw - main.mouse.x;
 					newh = main.desktop.windows[i].movestartth - main.mouse.y;
-					main.desktop.windows[i].element.style.top    = (newy > 0 ? newy : 0) + "px";
-					main.desktop.windows[i].element.style.left   = (newx > 0 ? newx : 0) + "px";
-					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
-					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					main.desktop.windows[i].element.style.top    = (newy >   0 ? newy :   0) + "px";
+					main.desktop.windows[i].element.style.left   = (newx >   0 ? newx :   0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 150 ? neww : 150) + "px";
+					main.desktop.windows[i].element.style.height = (newh > 100 ? newh : 100) + "px";
 					break;
 				case "t":
 					newy += main.mouse.y;
 					newh = main.desktop.windows[i].movestartth - main.mouse.y;
-					main.desktop.windows[i].element.style.top    = (newy > 0 ? newy : 0) + "px";
-					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					main.desktop.windows[i].element.style.top    = (newy >   0 ? newy :   0) + "px";
+					main.desktop.windows[i].element.style.height = (newh > 100 ? newh : 100) + "px";
 					break;
 				case "tr":
 					newy += main.mouse.y;
 					neww += main.mouse.x;
 					newh = main.desktop.windows[i].movestartth - main.mouse.y;
-					main.desktop.windows[i].element.style.top    = (newy > 0 ? newy : 0) + "px";
-					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
-					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					main.desktop.windows[i].element.style.top    = (newy >   0 ? newy : 0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 150 ? neww : 0) + "px";
+					main.desktop.windows[i].element.style.height = (newh > 100 ? newh : 0) + "px";
 					break;
 				case "l":
 					newx += main.mouse.x;
 					neww = main.desktop.windows[i].movestarttw - main.mouse.x;
-					main.desktop.windows[i].element.style.left   = (newx > 0 ? newx : 0) + "px";
-					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
+					main.desktop.windows[i].element.style.left   = (newx >   0 ? newx :   0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 150 ? neww : 150) + "px";
 					break;
 				case "r":
 					neww += main.mouse.x;
-					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 150 ? neww : 150) + "px";
 					break;
 				case "bl":
 					newx += main.mouse.x;
 					neww = main.desktop.windows[i].movestarttw - main.mouse.x;
 					newh += main.mouse.y;
-					main.desktop.windows[i].element.style.left   = (newx > 0 ? newx : 0) + "px";
-					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
-					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					main.desktop.windows[i].element.style.left   = (newx >   0 ? newx :   0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 150 ? neww : 150) + "px";
+					main.desktop.windows[i].element.style.height = (newh > 100 ? newh : 100) + "px";
 					break;
 				case "b":
 					newh += main.mouse.y;
-					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					main.desktop.windows[i].element.style.height = (newh > 100 ? newh : 100) + "px";
 					break;
 				case "br":
 					neww += main.mouse.x;
 					newh += main.mouse.y;
-					main.desktop.windows[i].element.style.width  = (neww > 0 ? neww : 0) + "px";
-					main.desktop.windows[i].element.style.height = (newh > 0 ? newh : 0) + "px";
+					main.desktop.windows[i].element.style.width  = (neww > 150 ? neww : 150) + "px";
+					main.desktop.windows[i].element.style.height = (newh > 100 ? newh : 100) + "px";
 					break;
 			}
 		}
